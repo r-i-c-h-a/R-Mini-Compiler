@@ -1,10 +1,4 @@
 all: run
- 
-run1: code
-	./code
-
-code: opt.h code_opt.c
-	gcc opt.h code_opt.c
 
 run: a.out 
 	./a.out < testing.r
