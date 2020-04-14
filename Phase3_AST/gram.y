@@ -225,6 +225,6 @@ int main()
 		printf("Valid program\n");
 	}
 
-	//display_table(table, lastSym+1);
+	display_table(table, lastSym+1);
 
 }

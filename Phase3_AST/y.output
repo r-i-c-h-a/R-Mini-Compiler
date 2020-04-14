@@ -1,0 +1,1438 @@
+Grammar
+
+    0 $accept: start $end
+
+    1 start: exprlist
+
+    2 exprlist: %empty
+    3         | expr_or_assign
+    4         | exprlist SEMICOLON expr_or_assign
+    5         | exprlist SEMICOLON
+    6         | exprlist NEWLINE expr_or_assign
+    7         | exprlist NEWLINE
+
+    8 expr_or_assign: expr
+    9               | equal_assign
+   10               | statement
+   11               | print_statement
+
+   12 statement: IF ifcond expr_or_assign
+   13          | IF ifcond expr_or_assign ELSE expr_or_assign
+   14          | FOR forcond expr_or_assign
+   15          | WHILE cond expr_or_assign
+
+   16 equal_assign: SYMBOL EQ_ASSIGN expr_or_assign
+
+   17 print_statement: PRINT_ expr RIGHT_PAREN
+
+   18 cond: LEFT_PAREN expr RIGHT_PAREN
+   19     | LEFT_PAREN expr RIGHT_PAREN NEWLINE
+
+   20 ifcond: LEFT_PAREN expr RIGHT_PAREN
+   21       | LEFT_PAREN expr RIGHT_PAREN NEWLINE
+
+   22 forcond: LEFT_PAREN SYMBOL IN expr RIGHT_PAREN
+   23        | LEFT_PAREN SYMBOL IN expr RIGHT_PAREN NEWLINE
+
+   24 expr: SYMBOL
+   25     | NUM_CONST
+   26     | STR_CONST
+   27     | LEFT_CURLY exprlist RIGHT_CURLY
+   28     | LEFT_PAREN expr_or_assign RIGHT_PAREN
+   29     | expr COLON expr
+   30     | expr PLUS expr
+   31     | expr MINUS expr
+   32     | expr STAR expr
+   33     | expr FSLASH expr
+   34     | expr LT expr
+   35     | expr LE expr
+   36     | expr EQ expr
+   37     | expr NE expr
+   38     | expr GE expr
+   39     | expr GT expr
+   40     | expr AND2 expr
+   41     | expr OR2 expr
+   42     | SYMBOL LEFT_ASSIGN expr
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+NUM_CONST (258) 25
+STR_CONST (259) 26
+SYMBOL (260) 16 22 23 24 42
+LT (261) 34
+LE (262) 35
+EQ (263) 36
+NE (264) 37
+GE (265) 38
+GT (266) 39
+AND2 (267) 40
+OR2 (268) 41
+LEFT_ASSIGN (269) 42
+EQ_ASSIGN (270) 16
+IF (271) 12 13
+ELSE (272) 13
+FOR (273) 14
+WHILE (274) 15
+IN (275) 22 23
+PRINT_ (276) 17
+NEWLINE (277) 6 7 19 21 23
+PLUS (278) 30
+MINUS (279) 31
+STAR (280) 32
+FSLASH (281) 33
+SEMICOLON (282) 4 5
+COLON (283) 29
+LEFT_PAREN (284) 18 19 20 21 22 23 28
+RIGHT_PAREN (285) 17 18 19 20 21 22 23 28
+LEFT_CURLY (286) 27
+RIGHT_CURLY (287) 27
+
+
+Nonterminals, with rules where they appear
+
+$accept (33)
+    on left: 0
+start (34)
+    on left: 1, on right: 0
+exprlist (35)
+    on left: 2 3 4 5 6 7, on right: 1 4 5 6 7 27
+expr_or_assign (36)
+    on left: 8 9 10 11, on right: 3 4 6 12 13 14 15 16 28
+statement (37)
+    on left: 12 13 14 15, on right: 10
+equal_assign (38)
+    on left: 16, on right: 9
+print_statement (39)
+    on left: 17, on right: 11
+cond (40)
+    on left: 18 19, on right: 15
+ifcond (41)
+    on left: 20 21, on right: 12 13
+forcond (42)
+    on left: 22 23, on right: 14
+expr (43)
+    on left: 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41
+    42, on right: 8 17 18 19 20 21 22 23 29 30 31 32 33 34 35 36 37
+    38 39 40 41 42
+
+
+State 0
+
+    0 $accept: . start $end
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    $default  reduce using rule 2 (exprlist)
+
+    start            go to state 10
+    exprlist         go to state 11
+    expr_or_assign   go to state 12
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 1
+
+   25 expr: NUM_CONST .
+
+    $default  reduce using rule 25 (expr)
+
+
+State 2
+
+   26 expr: STR_CONST .
+
+    $default  reduce using rule 26 (expr)
+
+
+State 3
+
+   16 equal_assign: SYMBOL . EQ_ASSIGN expr_or_assign
+   24 expr: SYMBOL .
+   42     | SYMBOL . LEFT_ASSIGN expr
+
+    LEFT_ASSIGN  shift, and go to state 17
+    EQ_ASSIGN    shift, and go to state 18
+
+    $default  reduce using rule 24 (expr)
+
+
+State 4
+
+   12 statement: IF . ifcond expr_or_assign
+   13          | IF . ifcond expr_or_assign ELSE expr_or_assign
+
+    LEFT_PAREN  shift, and go to state 19
+
+    ifcond  go to state 20
+
+
+State 5
+
+   14 statement: FOR . forcond expr_or_assign
+
+    LEFT_PAREN  shift, and go to state 21
+
+    forcond  go to state 22
+
+
+State 6
+
+   15 statement: WHILE . cond expr_or_assign
+
+    LEFT_PAREN  shift, and go to state 23
+
+    cond  go to state 24
+
+
+State 7
+
+   17 print_statement: PRINT_ . expr RIGHT_PAREN
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 26
+
+
+State 8
+
+   28 expr: LEFT_PAREN . expr_or_assign RIGHT_PAREN
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr_or_assign   go to state 27
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 9
+
+   27 expr: LEFT_CURLY . exprlist RIGHT_CURLY
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    $default  reduce using rule 2 (exprlist)
+
+    exprlist         go to state 28
+    expr_or_assign   go to state 12
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 10
+
+    0 $accept: start . $end
+
+    $end  shift, and go to state 29
+
+
+State 11
+
+    1 start: exprlist .
+    4 exprlist: exprlist . SEMICOLON expr_or_assign
+    5         | exprlist . SEMICOLON
+    6         | exprlist . NEWLINE expr_or_assign
+    7         | exprlist . NEWLINE
+
+    NEWLINE    shift, and go to state 30
+    SEMICOLON  shift, and go to state 31
+
+    $default  reduce using rule 1 (start)
+
+
+State 12
+
+    3 exprlist: expr_or_assign .
+
+    $default  reduce using rule 3 (exprlist)
+
+
+State 13
+
+   10 expr_or_assign: statement .
+
+    $default  reduce using rule 10 (expr_or_assign)
+
+
+State 14
+
+    9 expr_or_assign: equal_assign .
+
+    $default  reduce using rule 9 (expr_or_assign)
+
+
+State 15
+
+   11 expr_or_assign: print_statement .
+
+    $default  reduce using rule 11 (expr_or_assign)
+
+
+State 16
+
+    8 expr_or_assign: expr .
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    LT      shift, and go to state 32
+    LE      shift, and go to state 33
+    EQ      shift, and go to state 34
+    NE      shift, and go to state 35
+    GE      shift, and go to state 36
+    GT      shift, and go to state 37
+    AND2    shift, and go to state 38
+    OR2     shift, and go to state 39
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    $default  reduce using rule 8 (expr_or_assign)
+
+
+State 17
+
+   42 expr: SYMBOL LEFT_ASSIGN . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 45
+
+
+State 18
+
+   16 equal_assign: SYMBOL EQ_ASSIGN . expr_or_assign
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr_or_assign   go to state 46
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 19
+
+   20 ifcond: LEFT_PAREN . expr RIGHT_PAREN
+   21       | LEFT_PAREN . expr RIGHT_PAREN NEWLINE
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 47
+
+
+State 20
+
+   12 statement: IF ifcond . expr_or_assign
+   13          | IF ifcond . expr_or_assign ELSE expr_or_assign
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr_or_assign   go to state 48
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 21
+
+   22 forcond: LEFT_PAREN . SYMBOL IN expr RIGHT_PAREN
+   23        | LEFT_PAREN . SYMBOL IN expr RIGHT_PAREN NEWLINE
+
+    SYMBOL  shift, and go to state 49
+
+
+State 22
+
+   14 statement: FOR forcond . expr_or_assign
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr_or_assign   go to state 50
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 23
+
+   18 cond: LEFT_PAREN . expr RIGHT_PAREN
+   19     | LEFT_PAREN . expr RIGHT_PAREN NEWLINE
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 51
+
+
+State 24
+
+   15 statement: WHILE cond . expr_or_assign
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr_or_assign   go to state 52
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 25
+
+   24 expr: SYMBOL .
+   42     | SYMBOL . LEFT_ASSIGN expr
+
+    LEFT_ASSIGN  shift, and go to state 17
+
+    $default  reduce using rule 24 (expr)
+
+
+State 26
+
+   17 print_statement: PRINT_ expr . RIGHT_PAREN
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    LT           shift, and go to state 32
+    LE           shift, and go to state 33
+    EQ           shift, and go to state 34
+    NE           shift, and go to state 35
+    GE           shift, and go to state 36
+    GT           shift, and go to state 37
+    AND2         shift, and go to state 38
+    OR2          shift, and go to state 39
+    PLUS         shift, and go to state 40
+    MINUS        shift, and go to state 41
+    STAR         shift, and go to state 42
+    FSLASH       shift, and go to state 43
+    COLON        shift, and go to state 44
+    RIGHT_PAREN  shift, and go to state 53
+
+
+State 27
+
+   28 expr: LEFT_PAREN expr_or_assign . RIGHT_PAREN
+
+    RIGHT_PAREN  shift, and go to state 54
+
+
+State 28
+
+    4 exprlist: exprlist . SEMICOLON expr_or_assign
+    5         | exprlist . SEMICOLON
+    6         | exprlist . NEWLINE expr_or_assign
+    7         | exprlist . NEWLINE
+   27 expr: LEFT_CURLY exprlist . RIGHT_CURLY
+
+    NEWLINE      shift, and go to state 30
+    SEMICOLON    shift, and go to state 31
+    RIGHT_CURLY  shift, and go to state 55
+
+
+State 29
+
+    0 $accept: start $end .
+
+    $default  accept
+
+
+State 30
+
+    6 exprlist: exprlist NEWLINE . expr_or_assign
+    7         | exprlist NEWLINE .
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    $default  reduce using rule 7 (exprlist)
+
+    expr_or_assign   go to state 56
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 31
+
+    4 exprlist: exprlist SEMICOLON . expr_or_assign
+    5         | exprlist SEMICOLON .
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    $default  reduce using rule 5 (exprlist)
+
+    expr_or_assign   go to state 57
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 32
+
+   34 expr: expr LT . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 58
+
+
+State 33
+
+   35 expr: expr LE . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 59
+
+
+State 34
+
+   36 expr: expr EQ . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 60
+
+
+State 35
+
+   37 expr: expr NE . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 61
+
+
+State 36
+
+   38 expr: expr GE . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 62
+
+
+State 37
+
+   39 expr: expr GT . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 63
+
+
+State 38
+
+   40 expr: expr AND2 . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 64
+
+
+State 39
+
+   41 expr: expr OR2 . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 65
+
+
+State 40
+
+   30 expr: expr PLUS . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 66
+
+
+State 41
+
+   31 expr: expr MINUS . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 67
+
+
+State 42
+
+   32 expr: expr STAR . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 68
+
+
+State 43
+
+   33 expr: expr FSLASH . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 69
+
+
+State 44
+
+   29 expr: expr COLON . expr
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 70
+
+
+State 45
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+   42     | SYMBOL LEFT_ASSIGN expr .
+
+    LT      shift, and go to state 32
+    LE      shift, and go to state 33
+    EQ      shift, and go to state 34
+    NE      shift, and go to state 35
+    GE      shift, and go to state 36
+    GT      shift, and go to state 37
+    AND2    shift, and go to state 38
+    OR2     shift, and go to state 39
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    $default  reduce using rule 42 (expr)
+
+
+State 46
+
+   16 equal_assign: SYMBOL EQ_ASSIGN expr_or_assign .
+
+    $default  reduce using rule 16 (equal_assign)
+
+
+State 47
+
+   20 ifcond: LEFT_PAREN expr . RIGHT_PAREN
+   21       | LEFT_PAREN expr . RIGHT_PAREN NEWLINE
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    LT           shift, and go to state 32
+    LE           shift, and go to state 33
+    EQ           shift, and go to state 34
+    NE           shift, and go to state 35
+    GE           shift, and go to state 36
+    GT           shift, and go to state 37
+    AND2         shift, and go to state 38
+    OR2          shift, and go to state 39
+    PLUS         shift, and go to state 40
+    MINUS        shift, and go to state 41
+    STAR         shift, and go to state 42
+    FSLASH       shift, and go to state 43
+    COLON        shift, and go to state 44
+    RIGHT_PAREN  shift, and go to state 71
+
+
+State 48
+
+   12 statement: IF ifcond expr_or_assign .
+   13          | IF ifcond expr_or_assign . ELSE expr_or_assign
+
+    ELSE  shift, and go to state 72
+
+    $default  reduce using rule 12 (statement)
+
+
+State 49
+
+   22 forcond: LEFT_PAREN SYMBOL . IN expr RIGHT_PAREN
+   23        | LEFT_PAREN SYMBOL . IN expr RIGHT_PAREN NEWLINE
+
+    IN  shift, and go to state 73
+
+
+State 50
+
+   14 statement: FOR forcond expr_or_assign .
+
+    $default  reduce using rule 14 (statement)
+
+
+State 51
+
+   18 cond: LEFT_PAREN expr . RIGHT_PAREN
+   19     | LEFT_PAREN expr . RIGHT_PAREN NEWLINE
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    LT           shift, and go to state 32
+    LE           shift, and go to state 33
+    EQ           shift, and go to state 34
+    NE           shift, and go to state 35
+    GE           shift, and go to state 36
+    GT           shift, and go to state 37
+    AND2         shift, and go to state 38
+    OR2          shift, and go to state 39
+    PLUS         shift, and go to state 40
+    MINUS        shift, and go to state 41
+    STAR         shift, and go to state 42
+    FSLASH       shift, and go to state 43
+    COLON        shift, and go to state 44
+    RIGHT_PAREN  shift, and go to state 74
+
+
+State 52
+
+   15 statement: WHILE cond expr_or_assign .
+
+    $default  reduce using rule 15 (statement)
+
+
+State 53
+
+   17 print_statement: PRINT_ expr RIGHT_PAREN .
+
+    $default  reduce using rule 17 (print_statement)
+
+
+State 54
+
+   28 expr: LEFT_PAREN expr_or_assign RIGHT_PAREN .
+
+    $default  reduce using rule 28 (expr)
+
+
+State 55
+
+   27 expr: LEFT_CURLY exprlist RIGHT_CURLY .
+
+    $default  reduce using rule 27 (expr)
+
+
+State 56
+
+    6 exprlist: exprlist NEWLINE expr_or_assign .
+
+    $default  reduce using rule 6 (exprlist)
+
+
+State 57
+
+    4 exprlist: exprlist SEMICOLON expr_or_assign .
+
+    $default  reduce using rule 4 (exprlist)
+
+
+State 58
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   34     | expr LT expr .
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    LT  error (nonassociative)
+    LE  error (nonassociative)
+    EQ  error (nonassociative)
+    NE  error (nonassociative)
+    GE  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 34 (expr)
+
+
+State 59
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   35     | expr LE expr .
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    LT  error (nonassociative)
+    LE  error (nonassociative)
+    EQ  error (nonassociative)
+    NE  error (nonassociative)
+    GE  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 35 (expr)
+
+
+State 60
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   36     | expr EQ expr .
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    LT  error (nonassociative)
+    LE  error (nonassociative)
+    EQ  error (nonassociative)
+    NE  error (nonassociative)
+    GE  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 36 (expr)
+
+
+State 61
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   37     | expr NE expr .
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    LT  error (nonassociative)
+    LE  error (nonassociative)
+    EQ  error (nonassociative)
+    NE  error (nonassociative)
+    GE  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 37 (expr)
+
+
+State 62
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   38     | expr GE expr .
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    LT  error (nonassociative)
+    LE  error (nonassociative)
+    EQ  error (nonassociative)
+    NE  error (nonassociative)
+    GE  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 38 (expr)
+
+
+State 63
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   39     | expr GT expr .
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    LT  error (nonassociative)
+    LE  error (nonassociative)
+    EQ  error (nonassociative)
+    NE  error (nonassociative)
+    GE  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 39 (expr)
+
+
+State 64
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   40     | expr AND2 expr .
+   41     | expr . OR2 expr
+
+    LT      shift, and go to state 32
+    LE      shift, and go to state 33
+    EQ      shift, and go to state 34
+    NE      shift, and go to state 35
+    GE      shift, and go to state 36
+    GT      shift, and go to state 37
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    $default  reduce using rule 40 (expr)
+
+
+State 65
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+   41     | expr OR2 expr .
+
+    LT      shift, and go to state 32
+    LE      shift, and go to state 33
+    EQ      shift, and go to state 34
+    NE      shift, and go to state 35
+    GE      shift, and go to state 36
+    GT      shift, and go to state 37
+    AND2    shift, and go to state 38
+    PLUS    shift, and go to state 40
+    MINUS   shift, and go to state 41
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    $default  reduce using rule 41 (expr)
+
+
+State 66
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   30     | expr PLUS expr .
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    $default  reduce using rule 30 (expr)
+
+
+State 67
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   31     | expr MINUS expr .
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    STAR    shift, and go to state 42
+    FSLASH  shift, and go to state 43
+    COLON   shift, and go to state 44
+
+    $default  reduce using rule 31 (expr)
+
+
+State 68
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   32     | expr STAR expr .
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    COLON  shift, and go to state 44
+
+    $default  reduce using rule 32 (expr)
+
+
+State 69
+
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   33     | expr FSLASH expr .
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    COLON  shift, and go to state 44
+
+    $default  reduce using rule 33 (expr)
+
+
+State 70
+
+   29 expr: expr . COLON expr
+   29     | expr COLON expr .
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    $default  reduce using rule 29 (expr)
+
+
+State 71
+
+   20 ifcond: LEFT_PAREN expr RIGHT_PAREN .
+   21       | LEFT_PAREN expr RIGHT_PAREN . NEWLINE
+
+    NEWLINE  shift, and go to state 75
+
+    $default  reduce using rule 20 (ifcond)
+
+
+State 72
+
+   13 statement: IF ifcond expr_or_assign ELSE . expr_or_assign
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 3
+    IF          shift, and go to state 4
+    FOR         shift, and go to state 5
+    WHILE       shift, and go to state 6
+    PRINT_      shift, and go to state 7
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr_or_assign   go to state 76
+    statement        go to state 13
+    equal_assign     go to state 14
+    print_statement  go to state 15
+    expr             go to state 16
+
+
+State 73
+
+   22 forcond: LEFT_PAREN SYMBOL IN . expr RIGHT_PAREN
+   23        | LEFT_PAREN SYMBOL IN . expr RIGHT_PAREN NEWLINE
+
+    NUM_CONST   shift, and go to state 1
+    STR_CONST   shift, and go to state 2
+    SYMBOL      shift, and go to state 25
+    LEFT_PAREN  shift, and go to state 8
+    LEFT_CURLY  shift, and go to state 9
+
+    expr  go to state 77
+
+
+State 74
+
+   18 cond: LEFT_PAREN expr RIGHT_PAREN .
+   19     | LEFT_PAREN expr RIGHT_PAREN . NEWLINE
+
+    NEWLINE  shift, and go to state 78
+
+    $default  reduce using rule 18 (cond)
+
+
+State 75
+
+   21 ifcond: LEFT_PAREN expr RIGHT_PAREN NEWLINE .
+
+    $default  reduce using rule 21 (ifcond)
+
+
+State 76
+
+   13 statement: IF ifcond expr_or_assign ELSE expr_or_assign .
+
+    $default  reduce using rule 13 (statement)
+
+
+State 77
+
+   22 forcond: LEFT_PAREN SYMBOL IN expr . RIGHT_PAREN
+   23        | LEFT_PAREN SYMBOL IN expr . RIGHT_PAREN NEWLINE
+   29 expr: expr . COLON expr
+   30     | expr . PLUS expr
+   31     | expr . MINUS expr
+   32     | expr . STAR expr
+   33     | expr . FSLASH expr
+   34     | expr . LT expr
+   35     | expr . LE expr
+   36     | expr . EQ expr
+   37     | expr . NE expr
+   38     | expr . GE expr
+   39     | expr . GT expr
+   40     | expr . AND2 expr
+   41     | expr . OR2 expr
+
+    LT           shift, and go to state 32
+    LE           shift, and go to state 33
+    EQ           shift, and go to state 34
+    NE           shift, and go to state 35
+    GE           shift, and go to state 36
+    GT           shift, and go to state 37
+    AND2         shift, and go to state 38
+    OR2          shift, and go to state 39
+    PLUS         shift, and go to state 40
+    MINUS        shift, and go to state 41
+    STAR         shift, and go to state 42
+    FSLASH       shift, and go to state 43
+    COLON        shift, and go to state 44
+    RIGHT_PAREN  shift, and go to state 79
+
+
+State 78
+
+   19 cond: LEFT_PAREN expr RIGHT_PAREN NEWLINE .
+
+    $default  reduce using rule 19 (cond)
+
+
+State 79
+
+   22 forcond: LEFT_PAREN SYMBOL IN expr RIGHT_PAREN .
+   23        | LEFT_PAREN SYMBOL IN expr RIGHT_PAREN . NEWLINE
+
+    NEWLINE  shift, and go to state 80
+
+    $default  reduce using rule 22 (forcond)
+
+
+State 80
+
+   23 forcond: LEFT_PAREN SYMBOL IN expr RIGHT_PAREN NEWLINE .
+
+    $default  reduce using rule 23 (forcond)

@@ -20,6 +20,18 @@ char *logic[] = {"<",">","<=",">=","==","!="};
 char *rel[] = {"&&","||"};
 char *keywords[] = {"IF","FALSE","GOTO","print"};
 
+int isid(char *s){
+	int i=0;
+	int len = strlen(s);
+	int flag = 1;
+	//printf("((In isid: %s %d))\n",s,isalpha(s[0]));
+	if(isalpha(s[0])==0) return 0;
+	for(i=1;i<len;i++){
+		if(isalnum(s[i])==0) return 0;
+	}
+	return 1;
+}
+
 char *strip(char *s){
         size_t size;
         char *end;
@@ -64,6 +76,14 @@ int isarith(char *s){
 	int i = 0;
 	for(i=0;i<4;i++){
 		if(s[0]==arith[i]) return 1;
+	} 
+	return 0;
+}
+
+int iskey(char *s){
+	int i = 0;
+	for(i=0;i<4;i++){
+		if(strcmp(s,keywords[i])==0) return 1;
 	} 
 	return 0;
 }
@@ -147,7 +167,7 @@ void finalICG(FILE *fp){
 	fclose(fp2);
 }
 
-void constant_propagation(FILE *fp,FILE *fp1){
+void constant_propagation(FILE *fp,FILE *fp1,char *s){
 	FILE *fp2;
 	char chunk[128];
 	dict_ i_t[200];
@@ -173,7 +193,7 @@ void constant_propagation(FILE *fp,FILE *fp1){
 		}
 	}
 	}
-	fp2 = fopen("ICG.txt","r");
+	fp2 = fopen(s,"r");
 	while(fgets(chunk, sizeof(chunk), fp2) != NULL) {
 	strcpy(chunk,strip(chunk));
 	//printf("%s\n",chunk);
@@ -273,7 +293,86 @@ void constant_folding(FILE *fp,FILE *fp1){
 	//fclose(fp2);
 	}
 
-
+void dead_code_elim(FILE *fp, FILE *fp1){
+	FILE *fp2;
+	char chunk[128];
+	dict_ use[200];
+	//char *i_t[200];
+	int d = 0;
+	while(fgets(chunk, sizeof(chunk), fp) != NULL) {
+	strcpy(chunk,strip(chunk));
+	list_ toks[200];
+	char *token = strtok(chunk, " ");
+	int length = 0;
+	while( token != NULL ) {
+		strcpy(toks[length].item,token);
+		token = strtok(NULL, " ");
+		length+=1;
+   	}
+	for(int i=0; i< length; i++){
+		//printf("%s ",toks[i].item);
+		//printf("%d %d %d %d\n",istemp(toks[i].item),isid(toks[i].item),islevel(toks[i].item),iskey(toks[i].item));
+		if(istemp(toks[i].item) || isid(toks[i].item) && !(islevel(toks[i].item)) && !(iskey(toks[i].item))){
+			int flag = 0;
+			for(int j = 0; j<d; j++){
+				if(strcmp(use[j].key,toks[i].item)==0){
+					char total[100];
+					sprintf(total, "%d", atoi(use[j].value)+1);
+					strcpy(use[j].value,total);
+					//printf("e%s %s %s\n\n",toks[i].item,use[j].key,use[j].value);
+					flag = 1;
+				}
+			}
+			if(flag == 0){
+				strcpy(use[d].key,toks[i].item);
+				strcpy(use[d].value,"1");
+				//printf("ne%s %s %s\n\n",toks[i].item,use[d].key,use[d].value);
+				d+=1;
+			}
+		//printf("%s %s %s\n\n",toks[i].item,use[d].key,use[d].value);
+		}
+	}
+	
+	}
+	fp2 = fopen("final.txt","r");
+	/*for(int j = 0; j<d; j++){
+				printf("%s %d\n",use[j].key,atoi(use[j].value));}*/
+	while(fgets(chunk, sizeof(chunk), fp2) != NULL) {
+	strcpy(chunk,strip(chunk));
+	//printf("%s\n",chunk);
+	list_ toks[200];
+	char *token = strtok(chunk, " ");
+	int length = 0;
+	while( token != NULL ) {
+		strcpy(toks[length].item,token);
+		token = strtok(NULL, " ");
+		length+=1;
+	}
+	int flag = 1;
+	//printf("%d\n",d);
+	for(int i=0; i< length; i++){
+			for(int j = 0; j<d; j++){
+				//printf("%s %s %d %d\n",use[j].key,toks[i].item,atoi(use[j].value),strcmp(use[j].key,toks[i].item));
+				if(strcmp(use[j].key,toks[i].item)==0 && atoi(use[j].value) <= 1){
+					//printf("e%s %s %s\n\n",toks[i].item,use[j].key,use[j].value);
+					flag = 0;
+				}
+			}
+		}
+	if(flag){
+		for(int i=0; i<length; i++){
+			//printf("%s ",toks[i].item);
+			fprintf(fp1,"%s ",toks[i].item);
+		}
+		//printf("\n");
+		fprintf(fp1,"\n");
+	}
+	
+}
+	fclose(fp);
+	fclose(fp1);
+	fclose(fp2);
+}
 
 
 
