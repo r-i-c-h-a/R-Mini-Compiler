@@ -123,7 +123,7 @@ def constant_folding(list_of_lines,comp=[]):
 
 def temp_const_propagation(list_of_lines):
 	"""
-
+	Performs constant propagation on all the unnecessary temporaries
 	"""
 	temp_val = dict()
 	for line in list_of_lines:
@@ -153,7 +153,7 @@ def temp_const_propagation(list_of_lines):
 
 def dict_of_tokens_usage(list_of_lines):
 	"""
-	
+	Checks the usage count of all the tokens in the ICG
 	"""
 	tokens = {}
 	for line in list_of_lines:
@@ -168,7 +168,7 @@ def dict_of_tokens_usage(list_of_lines):
 
 def dead_code_elimination(list_of_lines):
 	"""
-	
+	Elimination of dead code, i.e., line of code that is not used in the program after definition
 	"""
 	token_use = dict_of_tokens_usage(list_of_lines)
 	final_list = []
