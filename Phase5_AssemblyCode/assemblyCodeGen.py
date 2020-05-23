@@ -55,9 +55,9 @@ def releaseReg(reg_use,var_use):
 		else:
 			reg = reg_use[i]
 			var = i
-			print(var,reg)
+			#print(var,reg)
 			return reg,var
-	print(var,reg)
+	#print(var,reg)
 	return reg,var
 		
 
