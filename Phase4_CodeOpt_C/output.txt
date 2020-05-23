@@ -1,0 +1,69 @@
+T0 = 2
+b = T0
+
+T1 = 1
+c = T1
+
+T2 = 9
+d = T2
+
+T7 = T5 + T6
+T5 = T3 * T4
+T3 = b
+T4 = c
+
+T6 = d
+
+a = T7
+
+T12 = T10 - T11
+T10 = d
+T11 = T8 * T9
+T8 = b
+T9 = c
+
+
+e = T12
+
+T15 = T13 < T14
+T13 = a
+T14 = 5
+IF FALSE T15 GOTO L0
+
+L1: 
+T16 = T17 && T18
+T17 = T19 >= T20
+T19 = i
+T20 = 2
+
+T18 = T21 <= T22
+T21 = i
+T22 = 3
+IF FALSE T16 GOTO L2
+T23 = "mom"
+print T23
+
+GOTO L1
+L2:
+T24 = a
+print T24
+
+T25 = 5
+a = T25
+
+L0:
+L5: 
+T28 = T26 > T27
+T26 = i
+T27 = 3
+ 
+IF FALSE T28 GOTO L6
+T29 = 5
+a = T29
+
+GOTO L5
+L6:
+T30 = "end"
+print T30
+
+L4:

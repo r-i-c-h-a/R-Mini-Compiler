@@ -254,6 +254,7 @@ def assemblyCodeGeneration(list_of_lines):
 		line = line.strip('\n')
 		toks = line.split()
 		length = len(line.split())
+		str1 = ''
 
 		#print the level variable as it is in assembly code
 		if(length == 1 and toks[0][:-1] in levels):
