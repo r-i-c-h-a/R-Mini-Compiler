@@ -249,7 +249,7 @@ def assemblyCodeGeneration(list_of_lines):
 				toks[2] = expl[toks[2]]
 				list_of_lines[i] = addLine(toks)	
 		
-	print(exps)
+	#print(exps)
 	for line in list_of_lines:
 		line = line.strip('\n')
 		toks = line.split()
