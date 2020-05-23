@@ -3,10 +3,12 @@
 #include <string.h>
 #include <ctype.h>
 
+//DATA STRUCTURE: list
 typedef struct list{
 	char item[100];
 } list_;
 
+//DATA STRUCTURE: dictionary
 typedef struct dict{
 	char key[100];
 	char value[100];
@@ -100,6 +102,18 @@ int iskey(char *s){
 */
 
 void finalICG(FILE *fp){
+	/*
+	Substitutes for all the temporaries referring to constants/identifiers
+	eg.
+	BEFORE:
+		T1 = a
+		T2 = b
+		T3 = T1 + T2
+		c = T3
+	AFTER:
+		T3 = a + b
+		c = T3
+	*/
 	FILE *fp1,*fp2;
 	fp1 = fopen("ICG.txt","a");
 	char chunk[128];
@@ -168,6 +182,18 @@ void finalICG(FILE *fp){
 }
 
 void constant_propagation(FILE *fp,FILE *fp1,char *s){
+	/*
+	If any of the constants or temporaries contain constants, they are propagated as per their presence in the ICG
+	eg.
+	BEFORE:
+		b = 2
+		c = 3
+		T1 = b * c
+	AFTER:
+		b=2
+		c=3
+		T1 = 2 * 3
+	*/
 	FILE *fp2;
 	char chunk[128];
 	dict_ i_t[200];
@@ -259,6 +285,16 @@ int eval(int a, int b, char *c){
 }
 
 void constant_folding(FILE *fp,FILE *fp1){
+	/*
+	Evaluates of the constant expressions in the ICG
+	eg.
+	BEFORE:
+		T1 = 2 * 3
+		T3 = 8 / 4
+	AFTER:
+		T1 = 6
+		T3 = 2
+	*/
 	//FILE *fp2;
 	char chunk[128];
 	while(fgets(chunk, sizeof(chunk), fp) != NULL) {
@@ -294,6 +330,17 @@ void constant_folding(FILE *fp,FILE *fp1){
 	}
 
 void dead_code_elim(FILE *fp, FILE *fp1){
+	/*
+	Elimination of dead code, i.e., line of code that is not used in the program after definition
+	eg.
+	BEFORE:
+		a = 5                                                
+		x = a                                                                                                           
+		d = a * b  
+	AFTER:
+		a = 5
+		d = a * b
+	*/
 	FILE *fp2;
 	char chunk[128];
 	dict_ use[200];

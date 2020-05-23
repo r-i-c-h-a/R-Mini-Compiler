@@ -5,7 +5,6 @@
 	#include <string.h>
 	#include <stdlib.h>
 	#include "header.h"
-	#include "ast.h"
 
 	int valid = 1;
 	int label_count=0;
@@ -178,8 +177,6 @@ forcond:	LEFT_PAREN SYMBOL IN expr COLON expr RIGHT_PAREN		{
 expr:   SYMBOL		{	$$ = $1; modifyID($1.value, "symbol", $1.value);	}
 	|   NUM_CONST	{ 	$$ = $1;	}
 	|   STR_CONST	{ 
-						data temp_;
-    						strcpy(temp_.str_const, $1.value);
 						$$ = $1; 
 					}
 	|	LEFT_CURLY exprlist RIGHT_CURLY				{	$$ = $2;	}

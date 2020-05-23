@@ -9,7 +9,7 @@ int main(){
 FILE *fp;
 fp = fopen("output.txt","r");
 
-//printf("-------------------------ICG-------------------------\n");
+//printf("#################### ICG ####################\n");
 finalICG(fp);
 
 char *f1[] = {"const_prop1.txt","const_prop2.txt","const_prop3.txt","const_prop4.txt"};

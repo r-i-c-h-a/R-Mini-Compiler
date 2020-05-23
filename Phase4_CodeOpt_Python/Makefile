@@ -4,8 +4,8 @@ run: a.out code_optimisation.py
 	./a.out < testing.r
 	python3 code_optimisation.py
 
-a.out : lex.yy.c y.tab.c header.h ast.h ast.c
-	gcc lex.yy.c y.tab.c ast.c
+a.out : lex.yy.c y.tab.c header.h 
+	gcc lex.yy.c y.tab.c 
 	
 lex.yy.c : gram.l icg.y header.h
 	yacc -d -v icg.y

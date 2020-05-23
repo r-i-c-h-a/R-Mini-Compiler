@@ -169,6 +169,14 @@ def dict_of_tokens_usage(list_of_lines):
 def dead_code_elimination(list_of_lines):
 	"""
 	Elimination of dead code, i.e., line of code that is not used in the program after definition
+	eg.
+	BEFORE:
+		a = 5                                                
+		x = a                                                                                                           
+		d = a * b  
+	AFTER: 
+		a = 5
+		d = a * b
 	"""
 	token_use = dict_of_tokens_usage(list_of_lines)
 	final_list = []
