@@ -22,12 +22,11 @@ e = d-b*c
 if(a < 5) { 
 for (i in 2:3)
 {
-print("mom")
 }
 print(a) 
 a=5;} else {
 while(i>3){
-a=5
+a="okay"
 }
 print("end of program")
 }

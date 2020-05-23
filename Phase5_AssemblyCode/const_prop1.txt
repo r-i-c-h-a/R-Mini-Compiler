@@ -1,0 +1,40 @@
+b = 2
+c = 1
+d = 9
+T7 = 2 + 9 
+a = T7
+T12 = 9 - 2 
+e = T12
+T15 = h * f 
+s = T15
+s = "where?"
+loop = "loop?"
+cond = "cond?"
+acg = "ACG1"
+T22 = a < 5 
+IF FALSE T22 GOTO L0 
+s = "beginning-of-block"
+cond = "in-if"
+L1: 
+T25 = T26 && T27 
+T26 = i >= 2 
+T27 = i <= 3 
+IF FALSE T25 GOTO L2 
+loop = "in-for"
+GOTO L1 
+L2: 
+print a 
+a = 5
+L0: 
+cond = "in-else"
+L5: 
+T38 = i > 3 
+IF FALSE T38 GOTO L6 
+a = 5
+loop = "in-while"
+GOTO L5 
+L6: 
+s = "end-block"
+L4: 
+acg = "ACG2"
+s = "end"

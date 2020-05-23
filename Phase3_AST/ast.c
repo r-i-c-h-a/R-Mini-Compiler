@@ -2,49 +2,60 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "header.h"
 
-Node* make_node(char *type, data value, Node* *list, int len)
+node* createNode(char *data_type, val value, node* *list, int length)
 {
-    Node *temp = (Node *) malloc(sizeof(Node));
-    strcpy(temp->type, type);
-    temp->value = value;
+    node *tmp = (node *) malloc(sizeof(node));
+    strcpy(tmp->data_type, data_type);
+    tmp->value = value;
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < length; i++)
     {
-        temp->ptrlist[i] = list[i];
+        tmp->plist[i] = list[i];
     }
     
 
-    temp->_numnodes = len;
+    tmp->nodes_n = length;
 
-    return temp;
+    return tmp;
 }
 
-void disp_node_details(Node *n)
+void details(node *n)
 {
-    printf("\n----------------------------\n");
-    printf("Node Type: %s\t", n->type);
-    printf("Node Child Count: %d\t", n->_numnodes);
-    printf("Node Data: ");
-    if(strcmp(n->type, "NUM_CONST") == 0)
+   
+    //printf("TYPE: %s\t", n->data_type);
+    if(strcmp(n->data_type, "number_constant") == 0)
     {
-        printf("%d\n", n->value.num_const);
+        printf("TYPE: %-15s DATA: %-15d\n",n->data_type,n->value.const_num);
     }
-    else if(strcmp(n->type, "SYMBOL") == 0)
+    else if(strcmp(n->data_type, "string_constant") == 0)
     {
-        printf("%p\n", n->value.ptr);
+        printf("TYPE: %-15s DATA: %-15s\n",n->data_type,n->value.const_str);
     }
-    printf("\n----------------------------\n");
+    else if(strcmp(n->data_type, "symbol") == 0)
+    {
+
+
+	//printf("%s\n",((n->value.p)->symbol_name));
+        printf("TYPE: %-15s DATA: %-15s ADDRESS:%-15p\n",n->data_type,((n->value.p)->symbol_name),n->value.p);
+
+    }
+   else 
+   {
+        printf("TYPE: %-15s DATA:  \n",n->data_type);
+
+    }
 }
 
-void display_subtree(Node *n)
+void printAST(node *m)
 {
-    if(n != NULL)
+    if(m != NULL)
     {
-        disp_node_details(n);
-        for (int i = 0; i < n->_numnodes; i++)
+        details(m);
+        for (int i = 0; i < m->nodes_n; i++)
         {
-            display_subtree(n->ptrlist[i]);
+            printAST(m->plist[i]);
         }
         
     }

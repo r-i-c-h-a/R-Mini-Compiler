@@ -2,214 +2,135 @@
 
 %{
     #include <stdio.h>
-	#include <string.h>
-	#include <stdlib.h>
-	#include "header.h"
-	#include "ast.h"
-
-	int valid = 1;
-
-	extern char * yytext;
+    #include "header.h"
+    #include <stdlib.h>
+    #include "ast.h"
+	
+	int is_val = 1;
+	extern int sym_last;
+	extern sym_tab tab[SYM_TAB_SIZE];
+	
 %}
 
+%token T_NE T_GE T_GT T_LT T_LE T_EQ T_ANDD T_ORD
+%token T_LEFTASSIGN T_EQASSIGN
+%token T_IF T_ELSE T_FOR T_WHILE
+%token T_IN
+%token CONST_NUMBER CONST_STRING SYM
+%token T_NEWLINE
+%token T_SEMICOLON T_COLON
+%token T_PRINT
+%token T_PLUS T_MINUS T_STAR T_FSLASH
+%token T_LEFTPAREN T_RIGHTPAREN
+%token T_LEFTCURL T_RIGHTCURL
 
-%token NUM_CONST STR_CONST SYMBOL
-%token LT LE EQ NE GE GT AND2 OR2
-%token LEFT_ASSIGN EQ_ASSIGN
-%token IF ELSE FOR WHILE
-%token IN
-
-%token PRINT_
-%token NEWLINE
-
-%token PLUS MINUS STAR FSLASH
-%token SEMICOLON COLON
-%token LEFT_PAREN RIGHT_PAREN
-%token LEFT_CURLY RIGHT_CURLY
-
-
-%left		WHILE FOR
-%right		IF
-%left		ELSE
-%right		LEFT_ASSIGN
-%right		EQ_ASSIGN
-%left		OR2
-%left		AND2
-%nonassoc	GT GE LT LE EQ NE
-%left		PLUS MINUS
-%left		STAR FSLASH
-%left		COLON
-%nonassoc	LEFT_PAREN
+%nonassoc	T_NE T_LT T_LE T_GT T_GE T_EQ 
+%left		T_ORD
+%left		T_ANDD
+%right		T_LEFTASSIGN
+%right		T_EQASSIGN
+%right		T_IF
+%left		T_ELSE
+%left		T_WHILE T_FOR
+%left		T_PLUS T_MINUS
+%left		T_STAR T_FSLASH
+%nonassoc	T_LEFTPAREN
+%left		T_COLON
 
 %%
 
-start: exprlist		{
-						$$ = $1;
-						//printf("%p\n", $1.nodeptr);
-						display_subtree($$.nodeptr);
-					}
-    ;
+start: ls_exp { $$ = $1;
+		printAST($$.n_ptr); };
 
-exprlist:
-	|	expr_or_assign							{	$$ = $1;	}
-	|	exprlist SEMICOLON expr_or_assign		{
-								$$.nodeptr = make_node("SEQ", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-												}
-	|	exprlist SEMICOLON						{	$$ = $1;	}
-	|	exprlist NEWLINE expr_or_assign			{	
-								$$.nodeptr = make_node("SEQ", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-												}
-	|	exprlist NEWLINE						{	$$ = $1;	}
-;
+ls_exp:
+	| assn_or_exp			 {  $$ = $1;  }
+	| ls_exp T_SEMICOLON		 {  $$ = $1;  }	
+	| ls_exp T_SEMICOLON assn_or_exp {  $$.n_ptr = createNode("SEQ", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| ls_exp T_NEWLINE		 {  $$ = $1;  }
+	| ls_exp T_NEWLINE assn_or_exp	 {  $$.n_ptr = createNode("SEQ", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); };	
+    	
 
-expr_or_assign:   expr	{	$$ = $1;	}
-	|   equal_assign	{	$$ = $1;	}
-    |   statement		{	$$ = $1;	}
-	| print_statement 	{ }
-    ;
+assn_or_exp:   exp   { $$ = $1; }
+	| stmt 	     { $$ = $1; }
+	| eq_assn    { $$ = $1; }
+	| print_stmt { };
+        
 
-statement:
-    	IF ifcond expr_or_assign						{
-								$$.nodeptr = make_node("IF", (data) 0, (NodePtrList) {$2.nodeptr, $3.nodeptr, NULL}, 3);
-														}
-	|	IF ifcond expr_or_assign ELSE expr_or_assign	{
-								$$.nodeptr = make_node("IF", (data) 0, (NodePtrList) {$2.nodeptr, $3.nodeptr, $5.nodeptr}, 3);
-														}
-	|	FOR forcond expr_or_assign						{
-								$$.nodeptr = make_node("FOR", (data) 0, (NodePtrList) {$2.nodeptr, $3.nodeptr}, 2);
-														}
-	|	WHILE cond expr_or_assign						{
-								$$.nodeptr = make_node("WHILE", (data) 0, (NodePtrList) {$2.nodeptr, $3.nodeptr}, 2);
-														}
+stmt:
+    	  T_IF ifcond assn_or_exp	{   $$.n_ptr = createNode("if", (val) 0, (node_plist) {$2.n_ptr, $3.n_ptr, NULL}, 3); }
+	| T_IF ifcond assn_or_exp T_ELSE assn_or_exp  { $$.n_ptr = createNode("IF", (val) 0, (node_plist) {$2.n_ptr, $3.n_ptr, $5.n_ptr}, 3); }
+	| T_WHILE cond assn_or_exp	{   $$.n_ptr = createNode("while", (val) 0, (node_plist) {$2.n_ptr, $3.n_ptr}, 2);   }
+	| T_FOR forcond assn_or_exp	{   $$.n_ptr = createNode("for", (val) 0, (node_plist) {$2.n_ptr, $3.n_ptr}, 2);     };
+														
+	
 
-    ;
-
-equal_assign:
-	SYMBOL EQ_ASSIGN expr_or_assign	{ 
-								printf("eq_assign: %s %s, SYMBOL: %s\n", $3.type, $3.value, $1.value); 
-								modifyID($1.value, $3.type, $3.value); 
-
-								$1.nodeptr = make_node("SYMBOL", (data) getSymbol($1.value), (NodePtrList) {NULL}, 0);
-								$$.nodeptr = make_node("=", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-									}
-    ;
-
-print_statement: 
-	PRINT_ expr RIGHT_PAREN			{
-										$$.nodeptr = make_node("PRINT", (data) 0, (NodePtrList) {$2.nodeptr}, 1);
-									}
-    ;
+eq_assn:    SYM T_EQASSIGN assn_or_exp	{   modify_symtab($1.value, $3.type, $3.value);
+					    $1.n_ptr = createNode("symbol", (val) fetch_sym($1.value), (node_plist) {NULL}, 0);
+					    $$.n_ptr = createNode("=", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); };
 
 
-cond:	LEFT_PAREN expr RIGHT_PAREN				{	$$ = $2;	}
-	|	LEFT_PAREN expr RIGHT_PAREN NEWLINE		{	$$ = $2;	}
-    ;
+cond:	  T_LEFTPAREN exp T_RIGHTPAREN	{   $$ = $2;   }
+	| T_LEFTPAREN exp T_RIGHTPAREN T_NEWLINE  {  $$ = $2;  };
 
 
-ifcond:	LEFT_PAREN expr RIGHT_PAREN				{	$$ = $2;	}
-	|	LEFT_PAREN expr RIGHT_PAREN NEWLINE		{	$$ = $2;	}
-    ;
+forcond:  T_LEFTPAREN SYM T_IN exp T_RIGHTPAREN  {  $2.n_ptr = createNode("symbol", (val) fetch_sym($2.value), (node_plist) {NULL}, 0);	
+						    $$.n_ptr = createNode("for_condition", (val) 0, (node_plist) {$2.n_ptr, $4.n_ptr}, 2);  }
+	| T_LEFTPAREN SYM T_IN exp T_RIGHTPAREN T_NEWLINE  {  $2.n_ptr = createNode("symbol", (val) fetch_sym($2.value), (node_plist) {NULL}, 0);	
+							      $$.n_ptr = createNode("for_condition", (val) 0, (node_plist) {$2.n_ptr, $4.n_ptr}, 2);  };
 
 
-forcond:	LEFT_PAREN SYMBOL IN expr RIGHT_PAREN		{	
-							$2.nodeptr = make_node("SYMBOL", (data) getSymbol($2.value), (NodePtrList) {NULL}, 0);	
-							$$.nodeptr = make_node("FORCOND", (data) 0, (NodePtrList) {$2.nodeptr, $4.nodeptr}, 2);
-														}
-	|	LEFT_PAREN SYMBOL IN expr RIGHT_PAREN NEWLINE	{
-							$2.nodeptr = make_node("SYMBOL", (data) getSymbol($2.value), (NodePtrList) {NULL}, 0);	
-							$$.nodeptr = make_node("FORCOND", (data) 0, (NodePtrList) {$2.nodeptr, $4.nodeptr}, 2);
-														}
-    ;
+ifcond:	  T_LEFTPAREN exp T_RIGHTPAREN	{  $$ = $2;  }
+	| T_LEFTPAREN exp T_RIGHTPAREN T_NEWLINE  {  $$ = $2;  };
 
 
+print_stmt: T_PRINT exp T_RIGHTPAREN	{  $$.n_ptr = createNode("print", (val) 0, (node_plist) {$2.n_ptr}, 1);  };
 
-expr:   SYMBOL		{
-						$1.nodeptr = make_node("SYMBOL", (data) getSymbol($1.value), (NodePtrList) {NULL}, 0);
-						$$ = $1;
-					}
-    |   NUM_CONST	{ 
-						printf("num_const: %s %s\n", $1.type, $1.value);
-						$1.nodeptr = make_node("NUM_CONST", (data) atoi($1.value), (NodePtrList) {NULL}, 0); // check what to do for double type
-						$$ = $1;
-					}
-    |   STR_CONST	{ 
-						printf("str_const: %s %s\n", $1.type, $1.value);
-						data temp_;
-    						strcpy(temp_.str_const, $1.value);
-						$1.nodeptr = make_node("STR_CONST", temp_, (NodePtrList) {NULL}, 0);
-						$$ = $1; 
-					}
 
-    |	LEFT_CURLY exprlist RIGHT_CURLY				{	$$ = $2;	}
-	|	LEFT_PAREN expr_or_assign RIGHT_PAREN		{	$$ = $2;	}
+exp:      SYM 				{  $1.n_ptr = createNode("symbol", (val) fetch_sym($1.value), (node_plist) {NULL}, 0);
+					   $$ = $1;  }
+	| CONST_STRING			{ val tmp;
+    			  		  strcpy(tmp.const_str, $1.value);
+					  $1.n_ptr = createNode("string_constant", tmp, (node_plist) {NULL}, 0);
+					  $$ = $1; }
+	| CONST_NUMBER			{ $1.n_ptr = createNode("number_constant", (val) atoi($1.value), (node_plist) {NULL}, 0);
+                                          $$ = $1 ; };
+	| T_LEFTPAREN assn_or_exp T_RIGHTPAREN  {  $$ = $2;  }
+  	| T_LEFTCURL ls_exp T_RIGHTCURL {  $$ = $2;  }
 
-    |	expr COLON expr		{
-								$$.nodeptr = make_node(":", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr PLUS expr		{
-								$$.nodeptr = make_node("+", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr MINUS expr		{
-								$$.nodeptr = make_node("-", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr STAR expr		{
-								$$.nodeptr = make_node("*", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr FSLASH expr	{
-								$$.nodeptr = make_node("/", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
+	| exp T_LT exp			{  $$.n_ptr = createNode("<", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_GT exp			{  $$.n_ptr = createNode(">", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_LE exp			{  $$.n_ptr = createNode("<=",(val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_GE exp			{  $$.n_ptr = createNode(">=",(val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }	
+	| exp T_NE exp			{  $$.n_ptr = createNode("!=",(val) 0, (node_plist) {$1.n_ptr, $3.n_ptr},2);  } 			
+	| exp T_EQ exp			{  $$.n_ptr = createNode("==",(val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }		
+	| exp T_ANDD exp		{  $$.n_ptr = createNode("&&",(val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }	
+	| exp T_ORD exp			{  $$.n_ptr = createNode("||",(val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	
+	| exp T_PLUS exp		{  $$.n_ptr = createNode("+", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_MINUS exp		{  $$.n_ptr = createNode("-", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_COLON exp		{  $$.n_ptr = createNode(":", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_FSLASH exp		{  $$.n_ptr = createNode("*", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); }
+	| exp T_STAR exp		{  $$.n_ptr = createNode("/", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); };
+	
+	
 
-    |	expr LT expr		{
-								$$.nodeptr = make_node("<", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr LE expr		{
-								$$.nodeptr = make_node("<=", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr EQ expr		{
-								$$.nodeptr = make_node("==", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr NE expr		{
-								$$.nodeptr = make_node("!=", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr GE expr		{
-								$$.nodeptr = make_node(">=", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr GT expr		{
-								$$.nodeptr = make_node(">", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr AND2 expr		{
-								$$.nodeptr = make_node("&&", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-	|	expr OR2 expr		{
-								$$.nodeptr = make_node("||", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-							}
-
-	|	SYMBOL LEFT_ASSIGN expr		{ 
-								printf("left_assign: %s %s, SYMBOL: %s\n", $3.type, $3.value, $1.value); 
-								modifyID($1.value, $3.type, $3.value); 
-								$1.nodeptr = make_node("SYMBOL", (data) getSymbol($1.value), (NodePtrList) {NULL}, 0);
-								$$.nodeptr = make_node("<-", (data) 0, (NodePtrList) {$1.nodeptr, $3.nodeptr}, 2);
-									}
-    
-    ;
+	| SYM T_LEFTASSIGN exp		{  modify_symtab($1.value, $3.type, $3.value);
+					   $1.n_ptr = createNode("symbol", (val) fetch_sym($1.value), (node_plist) {NULL}, 0);
+					   $$.n_ptr = createNode("<-", (val) 0, (node_plist) {$1.n_ptr, $3.n_ptr}, 2); };
 
 %%
-
 #include <ctype.h>
 int yyerror(const char *s)
 {
-    printf("Invalid program\n");
-    valid = 0;
-	extern int yylineno;
-	printf("Line no: %d \n The error is: %s\n",yylineno,s);
-
-	while(1)
+    is_val = 0;
+    printf("THIS PROGRAM IS NOT VALID\n");
+    extern int yylineno;
+    printf("The ERROR is: %s\n at LINE NUMBER: %d \n",s,yylineno);
+    while(1)
 	{
-		int tok = yylex();
-		// printf("Err: %d \n", tok);
-		extern char * yytext;
-		printf("Err: %s \n", yytext);
-		if(tok == NEWLINE || tok == SEMICOLON)
+		int token = yylex();
+		printf("Error: %d\n", token);
+		if(token == T_SEMICOLON || token == T_NEWLINE )
 			break;
 	}
 	yyparse();
@@ -220,11 +141,13 @@ int main()
 {
     yyparse();
 
-	if(valid)
+	if(is_val)
 	{
-		printf("Valid program\n");
+		printf("---------------------------------");
+		printf("This program is valid");
+		printf("----------------------------------\n\n");
 	}
 
-	display_table(table, lastSym+1);
+	print_symtab(tab, sym_last+1);
 
 }

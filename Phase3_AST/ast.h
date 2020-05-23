@@ -1,30 +1,24 @@
-
-#pragma once
-
 #include "header.h"
 
-typedef union data
+typedef union val
 {
-    Symbol *ptr;
-    int num_const;
-    char str_const[20];
-} data;
+    sym_tab *p;
+    char const_str[30];
+    int const_num;
+    
+} val;
 
-typedef struct Node
+typedef struct node
 {
-    char type[20];
-    union data value;
-    // struct Node *left;
-    // struct Node *right;
+    union val value;
+    char data_type[30];
+    int nodes_n;
+    struct node* plist[15];
+} node;
+#define node_plist node * []
 
-    int _numnodes;
-    struct Node* ptrlist[10];
-} Node;
-
-#define NodePtrList Node * []
-
-Node* make_node(char *type, data value, Node* *list, int len);
-void display_subtree(Node *n);
+node* createNode(char *data_type, val value, node* *plist, int length);
+void printAST(node *m);
 
 
     

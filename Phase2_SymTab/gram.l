@@ -1,237 +1,143 @@
-%option yylineno
-
-%{
-	#include <string.h>
+%{      
 	#include "header.h"
-    #include "y.tab.h"
+	#include "y.tab.h"
+	#include <string.h>
+	
+	int sym_last = -1;
+   	sym_tab tab[SYM_TAB_SIZE];
 
-
-	Symbol table[TABLE_SIZE];
-	int lastSym = -1;
 %}
+
+%option yylineno
 
 %%
 
+[ \t]   ;
+
 #.*	;
 
-[ \t]	;
+"for"	{return T_FOR;}
 
-\n+	{
-		// printf("NEWLINE\n");
-		return NEWLINE;
-	}
+"in"	{return T_IN;}
 
-"if"	{
-			return IF;
-		}
+"while"	{return T_WHILE;}
 
-"else"	{
-			return ELSE;
-		}
+"if"	{return T_IF;}
 
-"for"	{
-			return FOR;
-		}
+"else"	{return T_ELSE;}
 
-"while"	{
-			return WHILE;
-		}
+\n+	{return T_NEWLINE;}
 
-"in"	{
-			return IN;
-		}
+"+"	{return T_PLUS;}
 
-"+"		{
-			return PLUS;
-		}
+"-"	{return T_MINUS;}
 
-"-"		{
-			return MINUS;
-		}
+"*"	{return T_STAR;}
 
-"*"		{
-			return STAR;
-		}
+"/"	{return T_FSLASH;}
 
-"/"		{
-			return FSLASH;
-		}
+"("	{return T_LEFTPAREN;}
 
-";"		{
-			return SEMICOLON;
-		}
+")"	{return T_RIGHTPAREN;}
 
-":"		{
-			return COLON;
-		}
+"{"	{return T_LEFTCURL;}
 
-"("		{
-			return LEFT_PAREN;
-		}
+"}"	{return T_RIGHTCURL;}
 
-")"		{
-			return RIGHT_PAREN;
-		}
+";"	{return T_SEMICOLON;}
 
-"{"		{
-			return LEFT_CURLY;
-		}
+":"	{return T_COLON;}
 
-"}"		{
-			return RIGHT_CURLY;
-		}
-
-"<"		{
-  			return LT;
-		}
+"<"	{return T_LT;}
         
-"<="	{
-  			return LE;
-		}
+"<="	{return T_LE;}
         
-"=="	{
-			// printf("EQ\n");
-  			return EQ;
-		}
+"=="	{return T_EQ;}
         
-"!="	{
-  			return NE;
-		}
+"!="	{return T_NE;}
 
-">"		{
-  			return GT;
-		}
+">"	{return T_GT;}
         
-">="	{
-  			return GE;
-		}
+">="	{return T_GE;}
         
-"&&"	{
-  			return AND2;
-		}
+"&&"	{return T_ANDD;}
         
-"||"	{
-  			return OR2;
-		}
+"||"	{return T_ORD;}
+
+"="	{return T_EQASSIGN;}
         
-"<-"	{
-			// printf("<-\n");
-  			return LEFT_ASSIGN;
-		}
+"<-"	{return T_LEFTASSIGN;}
         
-"="		{
-			// printf("=\n");
-  			return EQ_ASSIGN;
-		}
 
-"print("	{
-				// printf("print(\n");
-				return PRINT_;
-			}
+"print(" {return T_PRINT;}
+
+\".*\"			{ strcpy(yylval.type, "str");
+			  strcpy(yylval.value, yytext);
+  			  return CONST_STRING;}
         
-[0-9]+(\.[0-9]+)?	{
-						// printf("NUM_CONST: %s, %d\n", yytext, yylineno);
-						strcpy(yylval.type, "number");
-						strcpy(yylval.value, yytext);
-						return NUM_CONST;
-					}
+[0-9]+(\.[0-9]+)?	{ strcpy(yylval.type, "num");
+			  strcpy(yylval.value, yytext);
+			  return CONST_NUMBER;}
 
-\".*\"	{
-			// printf("STR_CONST: %s\n", yytext);
-			strcpy(yylval.type, "string");
-			strcpy(yylval.value, yytext);
-  			return STR_CONST;
-		}
+[a-zA-Z_][a-zA-Z0-9_.]*	{ installID(yytext, yylineno);
+			  strcpy(yylval.value, yytext);
+  			  return SYM;}
 
-
-
-[a-zA-Z_][a-zA-Z0-9_.]*	{
-							installID(yytext, yylineno);
-							// printf("SYMBOL: %s\n", yytext);
-							strcpy(yylval.value, yytext);
-  							return SYMBOL;
-						}
-
-.	{	return yytext[0];	}
+.	                { return yytext[0];}
 
 %%
 
 int yywrap() { return 1; }
 
-int exists(char *sym)
+void installID(char *symbol_name, int ln_no)
 {
-    int flag=0;
-    for(int i=0;i<TABLE_SIZE;i++){
-        if(strcmp(sym,table[i].sym) == 0){
-            flag=1;
-            break;
-        }
-    }
-    return(flag);
-}
-
-void installID(char *sym_name, int lineno)
-{
-	if(!exists(sym_name))
+	if(lookup_symtab(symbol_name)== 0)
 	{
-		lastSym++;
-		strcpy(table[lastSym].sym, sym_name);
-		table[lastSym].lineno = lineno;
+		sym_last++;
+		strcpy(tab[sym_last].symbol_name, symbol_name);
+		tab[sym_last].ln_no = ln_no;
 	}
 }
 
-void modifyID(char *symbol, char *dtype, char *value){
-	for(int i=0; i<lastSym+1; i++){
-		if(strcmp(symbol,table[i].sym)==0){
-			strcpy(table[i].dtype, dtype);
-			strcpy(table[i].value, value);
+void modify_symtab(char *symbol_name, char *data_type, char *val){
+	for(int i=0; i<sym_last+1; i++){
+		if(strcmp(symbol_name,tab[i].symbol_name)==0){
+			strcpy(tab[i].data_type, data_type);
+			strcpy(tab[i].val, val);
 		}
 	}
 }
 
-void display_table(Symbol *table, int n)                                            
+int lookup_symtab(char *symbol)
+{
+    int exists=0;
+    for(int i=0;i<SYM_TAB_SIZE;i++){
+        if(strcmp(symbol,tab[i].symbol_name) == 0){
+            exists=1;
+            break;
+        }
+    }
+    return exists;
+}
+
+
+void print_symtab(sym_tab *tab, int c)                                            
 {                                                                                   
     
-    int i;                                                                          
-    
-    printf("%-20s %-10s %-20s %-10s\n",
-           "SYMBOL", "TYPE", "VALUE", "LINE NO.");                                
-    for (i = 0; i < n; i++) {
-        char *sym = table[i].sym;                                                   
-        /*
-        char *type;
-        switch (table[i].type) {                                                    
-            case NUMBER:
-                type = "NUMBER";                                                    
-                break;
-            case STRING:
-                type = "STRING";                                                    
-                break;                                                              
-        }
-        printf("%-20s %-10s %-20s %-10s\n",                                         
-        sym, type, ad);                                                             
-        */
-        printf("%-20s %-10s %-20s %010d\n",                                         
-        sym, table[i].dtype, table[i].value, table[i].lineno);                                              
+    int i; 
+    printf("----------------------------------SYMBOL TABLE--------------------------------------------------\n");
+    printf("===============================================================================================|\n");                                                                       
+    printf("%-25s %-15s %-25s %-15s\n",
+           "Symbol", "Value", "Data Type", "Line number");  
+    printf("===============================================================================================|\n");                                  
+    for (i = 0; i < c; i++) {
+        char *symbol = tab[i].symbol_name;                                                   
+        printf("%-25s %-15s %-25s %-15d\n ",                                         
+        symbol, tab[i].val, tab[i].data_type, tab[i].ln_no);  
+	printf("----------------------------------------------------------------------------------------------|\n") ;                                           
     }                                                                               
 
 }
 
-/*
-int main()
-{
 
-	int c;
-	extern FILE *yyin;
 
-	yyin = fopen("test.r", "r"); 
-	// yylex();
-
-	
-	while(!feof(yyin))
-	{
-		yylex();
-	} 
-
-	display_table(table, lastSym+1);
-} */

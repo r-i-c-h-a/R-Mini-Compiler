@@ -2,135 +2,121 @@
 
 %{
     #include <stdio.h>
-	#include "header.h"
-
-	extern Symbol table[TABLE_SIZE];
-	extern int lastSym;
-	int valid = 1;
+    #include "header.h"
+	
+	int is_val = 1;
+	extern int sym_last;
+	extern sym_tab tab[SYM_TAB_SIZE];
+	
 %}
 
+%token T_NE T_GE T_GT T_LT T_LE T_EQ T_ANDD T_ORD
+%token T_LEFTASSIGN T_EQASSIGN
+%token T_IF T_ELSE T_FOR T_WHILE
+%token T_IN
+%token CONST_NUMBER CONST_STRING SYM
+%token T_NEWLINE
+%token T_SEMICOLON T_COLON
+%token T_PRINT
+%token T_PLUS T_MINUS T_STAR T_FSLASH
+%token T_LEFTPAREN T_RIGHTPAREN
+%token T_LEFTCURL T_RIGHTCURL
 
-%token NUM_CONST STR_CONST SYMBOL
-%token LT LE EQ NE GE GT AND2 OR2
-%token LEFT_ASSIGN EQ_ASSIGN
-%token IF ELSE FOR WHILE
-%token IN
-
-%token PRINT_
-%token NEWLINE
-
-%token PLUS MINUS STAR FSLASH
-%token SEMICOLON COLON
-%token LEFT_PAREN RIGHT_PAREN
-%token LEFT_CURLY RIGHT_CURLY
-
-
-%left		WHILE FOR
-%right		IF
-%left		ELSE
-%right		LEFT_ASSIGN
-%right		EQ_ASSIGN
-%left		OR2
-%left		AND2
-%nonassoc	GT GE LT LE EQ NE
-%left		PLUS MINUS
-%left		STAR FSLASH
-%left		COLON
-%nonassoc	LEFT_PAREN
+%nonassoc	T_NE T_LT T_LE T_GT T_GE T_EQ 
+%left		T_ORD
+%left		T_ANDD
+%right		T_LEFTASSIGN
+%right		T_EQASSIGN
+%right		T_IF
+%left		T_ELSE
+%left		T_WHILE T_FOR
+%left		T_PLUS T_MINUS
+%left		T_STAR T_FSLASH
+%nonassoc	T_LEFTPAREN
+%left		T_COLON
 
 %%
 
-start: exprlist
-    ;
+start: ls_exp;
 
-exprlist:
-	|	expr_or_assign			
-	|	exprlist SEMICOLON expr_or_assign	
-	|	exprlist SEMICOLON			
-	|	exprlist NEWLINE expr_or_assign	
-	|	exprlist NEWLINE
-    |   exprlist NEWLINE print_statement
-    |   exprlist SEMICOLON print_statement
-	|	print_statement
-    ;
+ls_exp:
+	| assn_or_exp
+	| ls_exp T_SEMICOLON			
+	| ls_exp T_SEMICOLON assn_or_exp
+	| ls_exp T_NEWLINE	
+	| ls_exp T_NEWLINE assn_or_exp		
+    	| ls_exp T_NEWLINE print_stmt
+    	| ls_exp T_SEMICOLON print_stmt
+	| print_stmt;
 
-expr_or_assign:   expr	{ $$ = $1; }
-	|   equal_assign
-    |   statement
-    ;
+assn_or_exp:   exp { $$ = $1; }
+	| stmt
+	| eq_assn;
+        
 
-statement:
-    	IF ifcond expr_or_assign
-	|	IF ifcond expr_or_assign ELSE expr_or_assign
-	|	FOR forcond expr_or_assign
-	|	WHILE cond expr_or_assign
+stmt:
+    	  T_IF ifcond assn_or_exp
+	| T_IF ifcond assn_or_exp T_ELSE assn_or_exp
+	| T_WHILE cond assn_or_exp
+	| T_FOR forcond assn_or_exp;
+	
 
-    ;
-
-equal_assign:    SYMBOL EQ_ASSIGN expr_or_assign	{ printf("eq_assign: %s %s, SYMBOL: %s\n", $3.type, $3.value, $1.value); modifyID($1.value, $3.type, $3.value); }
-    ;
-
-print_statement: PRINT_ expr RIGHT_PAREN
-    ;
+eq_assn:    SYM T_EQASSIGN assn_or_exp	{ modify_symtab($1.value, $3.type, $3.value); };
 
 
-cond:	LEFT_PAREN expr RIGHT_PAREN
-	|	LEFT_PAREN expr RIGHT_PAREN NEWLINE
-    ;
+cond:	  T_LEFTPAREN exp T_RIGHTPAREN
+	| T_LEFTPAREN exp T_RIGHTPAREN T_NEWLINE;
 
 
-ifcond:	LEFT_PAREN expr RIGHT_PAREN
-	|	LEFT_PAREN expr RIGHT_PAREN NEWLINE	
-    ;
+forcond:  T_LEFTPAREN SYM T_IN exp T_RIGHTPAREN
+	| T_LEFTPAREN SYM T_IN exp T_RIGHTPAREN T_NEWLINE;
 
 
-forcond:	LEFT_PAREN SYMBOL IN expr RIGHT_PAREN
-	|	LEFT_PAREN SYMBOL IN expr RIGHT_PAREN NEWLINE
-    ;
+ifcond:	  T_LEFTPAREN exp T_RIGHTPAREN
+	| T_LEFTPAREN exp T_RIGHTPAREN T_NEWLINE;
 
 
+print_stmt: T_PRINT exp T_RIGHTPAREN;
 
-expr:   SYMBOL
-    |   NUM_CONST	{ printf("num_cost: %s %s\n", $1.type, $1.value); $$ = $1;}
-    |   STR_CONST	{ printf("str_const: %s %s\n", $1.type, $1.value); $$ = $1; }
 
-    |	LEFT_CURLY exprlist RIGHT_CURLY
-	|	LEFT_PAREN expr_or_assign RIGHT_PAREN
+exp:      SYM
+	| CONST_STRING	{ $$ = $1; }
+	| CONST_NUMBER	{ $$ = $1;}
+	| T_LEFTPAREN assn_or_exp T_RIGHTPAREN
+  	| T_LEFTCURL ls_exp T_RIGHTCURL
 
-    |	expr COLON expr
-	|	expr PLUS expr
-	|	expr MINUS expr
-	|	expr STAR expr
-	|	expr FSLASH expr
+	| exp T_LT exp
+	| exp T_GT exp			
+	| exp T_LE exp
+	| exp T_GE exp				
+	| exp T_NE exp						
+	| exp T_EQ exp					
+	| exp T_ANDD exp			
+	| exp T_ORD exp
+	
+	| exp T_PLUS exp
+	| exp T_MINUS exp
+	| exp T_COLON exp
+	| exp T_FSLASH exp
+	| exp T_STAR exp
+	
+	
 
-    |	expr LT expr			
-	|	expr LE expr			
-	|	expr EQ expr			
-	|	expr NE expr			
-	|	expr GE expr			
-	|	expr GT expr			
-	|	expr AND2 expr			
-	|	expr OR2 expr	
-
-	|	SYMBOL LEFT_ASSIGN expr		{ printf("left_assign: %s %s, SYMBOL: %s\n", $3.type, $3.value, $1.value); modifyID($1.value, $3.type, $3.value); }
-    
-    ;
+	| SYM T_LEFTASSIGN exp		{ modify_symtab($1.value, $3.type, $3.value); };
 
 %%
-
 #include <ctype.h>
 int yyerror(const char *s)
 {
-    printf("Invalid program\n");
-    valid = 0;
-	extern int yylineno;
-	printf("Line no: %d \n The error is: %s\n",yylineno,s);
-
-	while(1)
+    is_val = 0;
+    printf("THIS PROGRAM IS NOT VALID\n");
+    extern int yylineno;
+    printf("The ERROR is: %s\n at LINE NUMBER: %d \n",s,yylineno);
+    while(1)
 	{
-		int tok = yylex();
-		printf("Err: %d\n", tok);
-		if(tok == NEWLINE || tok == SEMICOLON)
+		int token = yylex();
+		printf("Error: %d\n", token);
+		if(token == T_SEMICOLON || token == T_NEWLINE )
 			break;
 	}
 	yyparse();
@@ -141,11 +127,13 @@ int main()
 {
     yyparse();
 
-	if(valid)
+	if(is_val)
 	{
-		printf("Valid program\n");
+		printf("--------------------------------");
+		printf("This program is valid");
+		printf("---------------------------------\n\n");
 	}
 
-	display_table(table, lastSym+1);
+	print_symtab(tab, sym_last+1);
 
 }

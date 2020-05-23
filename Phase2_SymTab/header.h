@@ -1,29 +1,29 @@
-
+#define SYM_TAB_SIZE 400
 #pragma once
-#define TABLE_SIZE 100
+
+
+typedef struct symbol_table
+{
+    int  ln_no;
+    char symbol_name[50];
+    char data_type[200];
+    char val[200];
+   
+} sym_tab;
 
 typedef struct 
 {
-    char type[20];
-    char value[20];
-} yylval_t;
+    char type[40];
+    char value[40];
+} _yylval;
 
-#define YYSTYPE yylval_t
+#define YYSTYPE _yylval
 
-enum type {NUMBER, STRING};
 
-typedef struct Symbol
-{
-    char sym[20];
-    // enum type type;
-    char dtype[100];
-    char value[100];
-    int lineno;
-} Symbol;
+extern sym_tab tab[SYM_TAB_SIZE];
+extern int sym_last;
 
-extern Symbol table[TABLE_SIZE];
-extern int lastSym;
-
-int exists(char *sym);
-void display_table(Symbol *_table, int n);
-void installID(char *sym_name, int lineno);
+int lookup_symtab(char *symbol);
+void installID(char *symbol_name, int ln_no);
+void modify_symtab(char *symbol_name, char *data_type, char *val);
+void print_symtab(sym_tab *tab, int c);
