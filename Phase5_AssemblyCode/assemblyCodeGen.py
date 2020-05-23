@@ -152,72 +152,6 @@ def assemblyCodeGeneration(list_of_lines):
 		if(length == 2 and islevel(toks[1])):
 			levels.append(toks[1])
 
-		if(length == 3):
-			var_use[toks[0]].pop(0)
-			if(isid(toks[0]) and toks[1] == '=' and isstr(toks[2])):
-				if(toks[0] not in reg_use and reg_avail):
-					reg_use[toks[0]] = reg_avail.pop(0)
-					str1 = '\n' + addLine(["string: .asciz",toks[2]]) + '\n'
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","string"])
-					expa[toks[0]] = str1
-				elif(toks[0] in reg_use):
-					str1 = '\n' + addLine(["string: .asciz",toks[2]]) + '\n'
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","string"])
-					expa[toks[0]] = str1
-				else:
-					r,v = releaseReg(reg_use,var_use)
-					reg_use.pop(v)
-					reg_use[toks[0]] = r
-					str1 = str1 + addLine(["ST",v,",",r]) + '\n'
-					str1 = str1 + addLine(["string: .asciz",toks[2]]) + '\n'
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","string"])
-					expa[toks[0]] = str1
-					
-
-			elif(isid(toks[0]) and toks[1] == '=' and isnum(toks[2])):
-				if(toks[0] not in reg_use and reg_avail):
-					reg_use[toks[0]] = reg_avail.pop(0)
-					str1 = addLine(["MOV",reg_use[toks[0]],",","#"+toks[2]])
-					expa[toks[0]] = str1
-				elif(toks[0] in reg_use):
-					str1 = addLine(["MOV",reg_use[toks[0]],",","#"+toks[2]])
-					expa[toks[0]] = str1
-				else:
-					r,v = releaseReg(reg_use,var_use)
-					reg_use.pop(v)
-					reg_use[toks[0]] = r
-					str1 = str1 + addLine(["ST",v,",",r]) + '\n'
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","#"+toks[2]])
-					expa[toks[0]] = str1
-
-			else:
-				var_use[toks[2]].pop(0)
-				if(reg_avail and toks[0] not in reg_use):
-					reg_use[toks[0]] = reg_avail.pop(0)
-				else:
-					r,v = releaseReg(reg_use,var_use)
-					reg_use.pop(v)
-					reg_use[toks[0]] = r
-					str1 = addLine(["ST",v,",",r]) + '\n' 
-
-				if(reg_avail and toks[2] not in reg_use):
-					reg = reg_avail.pop(0)
-					str1 = str1 + addLine(["LD",reg,",",toks[2]]) + '\n'
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",",reg])
-					reg_use[toks[2]] = reg
-					expa[toks[0]] = str1
-				elif(toks[2] in reg_use):
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",",reg_use[toks[2]]])
-					expa[toks[0]] = str1
-				else:
-					r,v = releaseReg(reg_use,var_use)
-					reg_use.pop(v)
-					reg_use[toks[2]] = r
-					str1 = str1 + addLine(["ST",v,",",r]) + '\n'
-					str1 = str1 + addLine(["LD",r,",",toks[2]]) + '\n'
-					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",",reg_use[toks[2]]])
-					expa[toks[0]] = str1
-
 		if(length == 5): 
 			if(islevel(toks[4])):
 				levels.append(toks[4])
@@ -313,10 +247,9 @@ def assemblyCodeGeneration(list_of_lines):
 			#substitite the relational expressions in place
 			if(toks[0] in keywords and toks[2] in expl):
 				toks[2] = expl[toks[2]]
-				list_of_lines[i] = addLine(toks)		
+				list_of_lines[i] = addLine(toks)	
 		
-	#print(reg_use)
-	#print(var_use)
+	print(exps)
 	for line in list_of_lines:
 		line = line.strip('\n')
 		toks = line.split()
@@ -344,8 +277,70 @@ def assemblyCodeGeneration(list_of_lines):
 		
 		"""
 		if(length == 3):
-			if(isid(toks[0]) and toks[1] == '='):
-				final_list.append(expa[toks[0]])
+			var_use[toks[0]].pop(0)
+			if(isid(toks[0]) and toks[1] == '=' and isstr(toks[2])):
+				if(toks[0] not in reg_use and reg_avail):
+					reg_use[toks[0]] = reg_avail.pop(0)
+					str1 = '\n' + addLine(["string: .asciz",toks[2]]) + '\n'
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","string"])
+					final_list.append(str1)
+				elif(toks[0] in reg_use):
+					str1 = '\n' + addLine(["string: .asciz",toks[2]]) + '\n'
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","string"])
+					final_list.append(str1)
+				else:
+					r,v = releaseReg(reg_use,var_use)
+					reg_use.pop(v)
+					reg_use[toks[0]] = r
+					str1 = str1 + addLine(["ST",v,",",r]) + '\n'
+					str1 = str1 + addLine(["string: .asciz",toks[2]]) + '\n'
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","string"])
+					final_list.append(str1)
+					
+
+			elif(isid(toks[0]) and toks[1] == '=' and isnum(toks[2])):
+				if(toks[0] not in reg_use and reg_avail):
+					reg_use[toks[0]] = reg_avail.pop(0)
+					str1 = addLine(["MOV",reg_use[toks[0]],",","#"+toks[2]])
+					final_list.append(str1)
+				elif(toks[0] in reg_use):
+					str1 = addLine(["MOV",reg_use[toks[0]],",","#"+toks[2]])
+					final_list.append(str1)
+				else:
+					r,v = releaseReg(reg_use,var_use)
+					reg_use.pop(v)
+					reg_use[toks[0]] = r
+					str1 = str1 + addLine(["ST",v,",",r]) + '\n'
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",","#"+toks[2]])
+					final_list.append(str1)
+
+			else:
+				var_use[toks[2]].pop(0)
+				if(reg_avail and toks[0] not in reg_use):
+					reg_use[toks[0]] = reg_avail.pop(0)
+				else:
+					r,v = releaseReg(reg_use,var_use)
+					reg_use.pop(v)
+					reg_use[toks[0]] = r
+					str1 = addLine(["ST",v,",",r]) + '\n' 
+
+				if(reg_avail and toks[2] not in reg_use):
+					reg = reg_avail.pop(0)
+					str1 = str1 + addLine(["LD",reg,",",toks[2]]) + '\n'
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",",reg])
+					reg_use[toks[2]] = reg
+					final_list.append(str1)
+				elif(toks[2] in reg_use):
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",",reg_use[toks[2]]])
+					final_list.append(str1)
+				else:
+					r,v = releaseReg(reg_use,var_use)
+					reg_use.pop(v)
+					reg_use[toks[2]] = r
+					str1 = str1 + addLine(["ST",v,",",r]) + '\n'
+					str1 = str1 + addLine(["LD",r,",",toks[2]]) + '\n'
+					str1 = str1 + addLine(["MOV",reg_use[toks[0]],",",reg_use[toks[2]]])
+					final_list.append(str1)
 
 		#Conditional break using relational assembly code previously defined
 		if(length == 5):
